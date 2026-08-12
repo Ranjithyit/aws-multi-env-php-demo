@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing dependencies for Prod..."
+
+  build:
+    commands:
+      - composer install --no-dev --optimize-autoloader
+      - echo "Build completed for Prod"
+
+  post_build:
+    commands:
+      - echo "Retrieving SSH key from Secrets Manager..."
+      - aws secretsmanager get-secret-value --secret-id multi-env-ssh-key --query SecretString --output text > /tmp/ssh-key.pem
+      - chmod 400 /tmp/ssh-key.pem
+      - echo "Deploying to PROD..."
+      - rsync -avz --delete -e "ssh -i /tmp/ssh-key.pem -o StrictHostKeyChecking=no" ./ ubuntu@$PROD_IP:/var/www/html/
+      - echo "Prod deployment completed"
+
+artifacts:
+  files:
+    - '**/*'

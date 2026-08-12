@@ -1,12 +1,26 @@
 version: 0.2
+
 phases:
   install:
     commands:
       - echo "Installing dependencies..."
+
   build:
     commands:
       - composer install --no-dev --optimize-autoloader
       - echo "Build completed"
+
+  post_build:
+    commands:
+      - echo "Retrieving SSH key from Secrets Manager..."
+      - aws secretsmanager get-secret-value --secret-id multi-env-ssh-key --query SecretString --output text > /tmp/ssh-key.pem
+      - chmod 400 /tmp/ssh-key.pem
+      - echo "Deploying to DEV..."
+      - rsync -avz --delete -e "ssh -i /tmp/ssh-key.pem -o StrictHostKeyChecking=no" ./ ubuntu@$DEV_IP:/var/www/html/
+      - echo "Deploying to STAGING..."
+      - rsync -avz --delete -e "ssh -i /tmp/ssh-key.pem -o StrictHostKeyChecking=no" ./ ubuntu@$STAGING_IP:/var/www/html/
+      - echo "Dev and Staging deployment completed. Prod deploy happens after manual approval."
+
 artifacts:
   files:
     - '**/*'
