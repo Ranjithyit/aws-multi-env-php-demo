@@ -13,7 +13,7 @@ phases:
   post_build:
     commands:
       - echo "Retrieving SSH key from Secrets Manager..."
-      - aws secretsmanager get-secret-value --secret-id multi-env-ssh-key --query SecretString --output text > /tmp/ssh-key.pem
+      - aws secretsmanager get-secret-value --secret-id multi-env-ssh-key --query SecretString --output text | python3 -c "import sys,json; print(json.load(sys.stdin)['sshKey'])" > /tmp/ssh-key.pem
       - chmod 400 /tmp/ssh-key.pem
       - echo "Deploying to DEV..."
       - rsync -avz --delete -e "ssh -i /tmp/ssh-key.pem -o StrictHostKeyChecking=no" ./ ubuntu@$DEV_IP:/var/www/html/
