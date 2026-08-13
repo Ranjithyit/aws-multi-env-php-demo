@@ -12,5 +12,3 @@ if ($uri === '/about') {
 } else {
     $controller->index();
 }
-<!-- trigger test -->
-<!-- trigger test New One-->
