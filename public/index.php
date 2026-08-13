@@ -12,3 +12,4 @@ if ($uri === '/about') {
 } else {
     $controller->index();
 }
+<!-- trigger test -->
