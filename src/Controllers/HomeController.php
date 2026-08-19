@@ -14,6 +14,7 @@ class HomeController
         echo "<h1>Hello from PHP Multi-Environment Demo!</h1>";
         echo "<p>Environment: <strong>$env</strong></p>";
         echo "<p>Server time: <strong>$time</strong></p>";
+        echo "<p>Testing Staging-only branch pipeline</p>";
     }
 
     public function about()
