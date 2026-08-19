@@ -1,0 +1,21 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing dependencies for Dev..."
+
+  build:
+    commands:
+      - composer install --no-dev --optimize-autoloader
+      - echo "Build completed for Dev"
+
+  post_build:
+    commands:
+      - aws secretsmanager get-secret-value --secret-id multi-env-ssh-key --query SecretString --output text | python3 -c "import sys,json; print(json.load(sys.stdin)['sshKey'])" > /tmp/ssh-key.pem
+      - chmod 400 /tmp/ssh-key.pem
+      - rsync -avz --delete -e "ssh -i /tmp/ssh-key.pem -o StrictHostKeyChecking=no" ./ ubuntu@$DEV_IP:/var/www/html/
+
+artifacts:
+  files:
+    - '**/*'
